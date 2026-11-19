@@ -12,6 +12,7 @@ final class PostModel
 
     public function __construct(private readonly PDO $pdo) {}
 
+
     public function getLatestByCategoryId(int $categoryId, int $limit = 3): array
     {
         $sql = <<<'SQL'
@@ -29,6 +30,56 @@ final class PostModel
 
         return array_map([$this, 'normalizePost'], $stmt->fetchAll());
     }
+
+
+    public function getAllByCategoryId(int $categoryId): array
+    {
+        $sql = <<<'SQL'
+            SELECT id, category_ids, title, short_description, description, image, viewed, created_at
+            FROM `posts`
+            WHERE FIND_IN_SET(:category_id, category_ids) > 0
+            ORDER BY created_at DESC, id DESC
+        SQL;
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['category_id' => (string) $categoryId]);
+
+        return array_map([$this, 'normalizePost'], $stmt->fetchAll());
+    }
+
+
+    public function findAndIncrementViews(int $id): ?array
+    {
+        $this->pdo->beginTransaction();
+
+        try {
+            $update = $this->pdo->prepare(
+                'UPDATE `posts` SET viewed = viewed + 1 WHERE id = :id'
+            );
+            $update->execute(['id' => $id]);
+
+            if ($update->rowCount() === 0) {
+                $this->pdo->rollBack();
+                return null;
+            }
+
+            $select = $this->pdo->prepare(
+                'SELECT id, category_ids, title, short_description, description, image, viewed, created_at FROM `posts` WHERE id = :id LIMIT 1'
+            );
+            $select->execute(['id' => $id]);
+            $post = $select->fetch();
+
+            $this->pdo->commit();
+
+            return $post !== false ? $this->normalizePost($post) : null;
+        } catch (\Throwable $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $e;
+        }
+    }
+
 
     private function normalizePost(array $row): array
     {

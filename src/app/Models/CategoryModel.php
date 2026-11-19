@@ -25,4 +25,31 @@ final class CategoryModel
 
         return $this->pdo->query($sql)->fetchAll();
     }
+
+    public function findById(int $id): ?array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT id, name, description, created_at FROM `categories` WHERE id = :id LIMIT 1'
+        );
+        $stmt->execute(['id' => $id]);
+        $row = $stmt->fetch();
+
+        return $row !== false ? $row : null;
+    }
+
+    public function findByIds(array $ids): array
+    {
+        $cleanIds = array_values(array_unique(array_filter(array_map('intval', $ids))));
+        if ($cleanIds === []) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($cleanIds), '?'));
+        $stmt = $this->pdo->prepare(
+            "SELECT id, name, description, created_at FROM `categories` WHERE id IN ($placeholders) ORDER BY id ASC"
+        );
+        $stmt->execute($cleanIds);
+
+        return $stmt->fetchAll();
+    }
 }
