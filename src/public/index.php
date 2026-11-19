@@ -1,12 +1,32 @@
 <?php
 
-//ini_set('display_errors', 1);
-//ini_set('display_startup_errors', 1);
-//error_reporting(E_ALL);
+declare(strict_types=1);
 
-require_once __DIR__ . '/../vendor/autoload.php';
+use App\Routing\RouteDispatcher;
+use Dotenv\Dotenv;
+use Smarty\Smarty;
 
-use App\Controllers\HomeController;
+$appRoot = dirname(__DIR__);
 
-$controller = new HomeController();
-$controller->index();
+require_once $appRoot . '/vendor/autoload.php';
+
+if (is_file($appRoot . '/.env')) {
+    Dotenv::createImmutable($appRoot)->safeLoad();
+}
+
+$pdo = require $appRoot . '/config/database.php';
+$routes = require $appRoot . '/config/routes.php';
+
+
+
+$smarty = new Smarty();
+$smarty->setTemplateDir($appRoot . '/templates/');
+$smarty->setCompileDir(sys_get_temp_dir() . '/smarty_compile/');
+$smarty->setCacheDir(sys_get_temp_dir() . '/smarty_cache/');
+$smarty->escape_html = true;
+
+$dispatcher = new RouteDispatcher($routes, $pdo, $smarty);
+$dispatcher->dispatch(
+    $_SERVER['REQUEST_METHOD'] ?? 'GET',
+    $_SERVER['REQUEST_URI'] ?? '/'
+);
