@@ -1,56 +1,22 @@
 {extends file="layout.tpl"}
 
 {block name="content"}
-    <article class="post-detail">
-        <header class="post-detail__header">
-            <a class="back-link" href="/">&larr; Back to blog</a>
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-9">
+            <article class="article-sheet shadow-sm p-4 p-md-5">
+                <div class="post-card__meta mb-2">
+                    <span>{$post.created_at|date_format:"%d.%m.%Y"}</span>
+                    {if isset($post.views)}
+                        <span class="ms-2">• {$post.views} переглядів</span>
+                    {/if}
+                </div>
 
-            <h1 class="post-detail__title">{$post.title}</h1>
+                <h1 class="h2 fw-bold mb-4">{$post.title}</h1>
 
-            <div class="post-detail__meta">
-                <span>ID: {$post.id}</span>
-                <time datetime="{$post.created_at}">Published: {$post.created_at}</time>
-                <span>Views: {$post.viewed}</span>
-            </div>
-
-            {if $categories|@count > 0}
-                <ul class="post-detail__categories">
-                    {foreach $categories as $cat}
-                        <li>
-                            <a href="/category?id={$cat.id}">{$cat.name}</a>
-                        </li>
-                    {/foreach}
-                </ul>
-            {/if}
-        </header>
-
-        <figure class="post-detail__media">
-            <img src="{$post.image_url}" alt="{$post.title}">
-        </figure>
-
-        <p class="post-detail__lead">{$post.short_description}</p>
-
-        <div class="post-detail__content">
-            {$post.description|nl2br}
+                <div class="article-body">
+                    {$post.short_description|nl2br}
+                </div>
+            </article>
         </div>
-
-        <dl class="post-detail__fields">
-            <dt>id</dt>
-            <dd>{$post.id}</dd>
-            <dt>category_ids</dt>
-            <dd>{$post.category_ids}</dd>
-            <dt>title</dt>
-            <dd>{$post.title}</dd>
-            <dt>short_description</dt>
-            <dd>{$post.short_description}</dd>
-            <dt>description</dt>
-            <dd>{$post.description}</dd>
-            <dt>image</dt>
-            <dd>{$post.image|default:'NULL'}</dd>
-            <dt>viewed</dt>
-            <dd>{$post.viewed}</dd>
-            <dt>created_at</dt>
-            <dd>{$post.created_at}</dd>
-        </dl>
-    </article>
+    </div>
 {/block}

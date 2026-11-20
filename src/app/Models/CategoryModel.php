@@ -52,4 +52,17 @@ final class CategoryModel
 
         return $stmt->fetchAll();
     }
+
+    public function getAll(): array
+    {
+        $sql = <<<'SQL'
+            SELECT id, name
+            FROM categories
+            ORDER BY name ASC, id ASC
+        SQL;
+
+        $stmt = $this->pdo->query($sql);
+
+        return $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+    }
 }

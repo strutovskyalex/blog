@@ -20,9 +20,10 @@ final class PostController
         $this->categoryModel = new CategoryModel($pdo);
     }
 
-    public function show(): void
+    public function show(?int $id = null): void
     {
-        $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+        $id = $id ?? (filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: null);
+
         if (!$id || $id <= 0) {
             http_response_code(400);
             echo 'Invalid post ID';
@@ -40,7 +41,6 @@ final class PostController
 
         $this->smarty->assign('pageTitle', $post['title'] . ' — Blog');
         $this->smarty->assign('post', $post);
-        $this->smarty->assign('categories', $categories);
         $this->smarty->display('post.tpl');
     }
 }
