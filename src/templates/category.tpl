@@ -3,8 +3,9 @@
 {block name="content"}
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
-            <span class="badge text-bg-primary rounded-pill mb-2">Category</span>
-            <h1 class="h2 fw-bold mb-0">{$category.name}</h1>
+            <span class="badge text-bg-primary rounded-pill mb-2 bg-dark text">Category</span>
+            <h1 class="h2 fw-bold mb-2">{$category.name}</h1>
+            <h4 class="h4 fw-bold mb-0">{$category.description}</h4>
         </div>
     </div>
 
@@ -16,8 +17,8 @@
                         <div class="card-body p-4">
                             <div class="post-card__meta mb-2">
                                 <span>{$post.created_at|date_format:"%d.%m.%Y"}</span>
-                                {if isset($post.views)}
-                                    <span class="ms-2">• {$post.views} переглядів</span>
+                                {if isset($post.viewed)}
+                                    <span class="ms-2">• {$post.viewed} viewed</span>
                                 {/if}
                             </div>
                             <h2 class="h5 card-title fw-bold">

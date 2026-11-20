@@ -37,10 +37,20 @@ final class PostController
             return;
         }
 
+
         $categories = $this->categoryModel->findByIds($post['category_id_list']);
+        $currentPostId = (int) $post['id'];
+
+        $suggestedPosts = $this->postModel->getRandomSuggestedByCategories(
+            categoryIds: $post['category_ids'],
+            excludePostId: $post['id'],
+            limit: 3
+        );
 
         $this->smarty->assign('pageTitle', $post['title'] . ' — Blog');
         $this->smarty->assign('post', $post);
+        $this->smarty->assign('categories', $categories);
+        $this->smarty->assign('suggestedPosts', $suggestedPosts);
         $this->smarty->display('post.tpl');
     }
 }

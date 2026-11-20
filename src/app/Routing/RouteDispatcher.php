@@ -8,7 +8,6 @@ use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use PDO;
 use Smarty\Smarty;
-use App\Models\CategoryModel;
 
 use function FastRoute\simpleDispatcher;
 
@@ -46,12 +45,6 @@ final class RouteDispatcher
     private function invokeHandler(array $handler, array $vars): void
     {
         [$controllerClass, $method] = $handler;
-
-        $categoryModel = new CategoryModel($this->pdo);
-        $categories = $categoryModel->getAll();
-
-        $this->smarty->assign('categories', $categories);
-
 
         $controller = new $controllerClass($this->pdo, $this->smarty);
         $routeId = isset($vars['id']) ? (int) $vars['id'] : null;

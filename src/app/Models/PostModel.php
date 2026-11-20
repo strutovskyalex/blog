@@ -91,4 +91,54 @@ final class PostModel
 
         return $row;
     }
+
+    public function getRandomSuggestedByCategories(array|string $categoryIds, int $excludePostId, int $limit = 3): array
+    {
+        $rawIds = is_string($categoryIds)
+            ? explode(',', $categoryIds)
+            : $categoryIds;
+
+        $ids = array_values(array_unique(array_filter(
+            array_map('intval', $rawIds),
+            static fn(int $id): bool => $id > 0
+        )));
+
+        if ($ids === [] || $limit <= 0) {
+            return [];
+        }
+
+        $conditions = [];
+        foreach ($ids as $index => $_) {
+            $conditions[] = "FIND_IN_SET(:cat_{$index}, category_ids) > 0";
+        }
+
+        $whereCategories = '(' . implode(' OR ', $conditions) . ')';
+
+        $sql = <<<SQL
+        SELECT DISTINCT id, title, short_description, image, viewed, created_at, category_ids
+        FROM posts
+        WHERE id <> :exclude_id
+          AND {$whereCategories}
+        ORDER BY RAND()
+        LIMIT :limit
+    SQL;
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':exclude_id', $excludePostId, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+
+        foreach ($ids as $index => $catId) {
+            $stmt->bindValue(":cat_{$index}", $catId, PDO::PARAM_INT);
+        }
+
+        $stmt->execute();
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $filtered = array_values(array_filter(
+            $rows,
+            static fn(array $row): bool => (int) ($row['id'] ?? 0) !== $excludePostId
+        ));
+
+        return array_slice($filtered, 0, $limit);
+    }
 }
