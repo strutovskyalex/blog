@@ -15,6 +15,9 @@ reset:
 	docker compose down -v
 	docker compose up -d
 
+composer-install:
+	docker compose exec web composer install
+
 schema:
 	docker compose exec -T db mysql -u"$(DB_USER)" -p"$(DB_PASS)" "$(DB_NAME)" < database/schema.sql
 
