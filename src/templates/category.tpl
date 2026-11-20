@@ -30,7 +30,7 @@
     </div>
 
     {if !empty($posts)}
-        <div class="row g-4">
+        <div class="row g-4 mb-4">
             {foreach $posts as $post}
                 <div class="col-md-6">
                     <article class="card post-card h-100">
@@ -50,6 +50,63 @@
                 </div>
             {/foreach}
         </div>
+
+        {if $totalPages > 1}
+            <nav aria-label="Pagination" class="mt-5">
+                <div class="d-flex flex-column align-items-center gap-3">
+                    <ul class="pagination flex-wrap justify-content-center gap-1 mb-0">
+                        <li class="page-item {if $currentPage <= 1}disabled{/if}">
+                            <a class="page-link rounded-pill px-3"
+                               href="/category/{$category.id}?sort={$currentSort}&dir={$currentDir}&page={$currentPage - 1}">
+                                ← Previous
+                            </a>
+                        </li>
+
+                        {foreach $pagesToShow as $item}
+                            {if $item === 'dots'}
+                                <li class="page-item disabled">
+                                    <span class="page-link border-0 bg-transparent px-2">…</span>
+                                </li>
+                            {else}
+                                <li class="page-item {if $item === $currentPage}active{/if}" {if $item === $currentPage}aria-current="page"{/if}>
+                                    <a class="page-link rounded-pill"
+                                       href="/category/{$category.id}?sort={$currentSort}&dir={$currentDir}&page={$item}">
+                                        {$item}
+                                    </a>
+                                </li>
+                            {/if}
+                        {/foreach}
+
+                        <li class="page-item {if $currentPage >= $totalPages}disabled{/if}">
+                            <a class="page-link rounded-pill px-3"
+                               href="/category/{$category.id}?sort={$currentSort}&dir={$currentDir}&page={$currentPage + 1}">
+                                Next →
+                            </a>
+                        </li>
+                    </ul>
+
+                    <form method="get"
+                          action="/category/{$category.id}"
+                          class="d-flex align-items-center gap-2 small text-secondary">
+                        <input type="hidden" name="sort" value="{$currentSort}">
+                        <input type="hidden" name="dir" value="{$currentDir}">
+                        <label for="jumpToPage" class="mb-0">Page:</label>
+                        <input type="number"
+                               id="jumpToPage"
+                               name="page"
+                               min="1"
+                               max="{$totalPages}"
+                               value="{$currentPage}"
+                               class="form-control form-control-sm text-center"
+                               style="width: 76px;">
+                        <span>з {$totalPages}</span>
+                        <button type="submit" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                            Goto
+                        </button>
+                    </form>
+                </div>
+            </nav>
+        {/if}
     {else}
         <div class="alert alert-light border text-secondary">There are no posts in this category yet.</div>
     {/if}

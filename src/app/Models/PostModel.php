@@ -64,11 +64,25 @@ class PostModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getCountOfPostsCategory($categoryIds): int
+    {
+        $sql = <<<SQL
+            SELECT COUNT(*)
+            FROM posts
+            WHERE category_ids IN ({$categoryIds})
+        SQL;
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
+        return (int) $stmt->fetchColumn();
+    }
+
     public function getPostsByCategorySorted(
         int $categoryId,
         string $sort = 'date',
         string $direction = 'desc',
-        int|string $limit = 'all'
+        int|string|null $limit = 'all',
+        int|null $offset = null,
     ): array {
         if ($categoryId <= 0) {
             return [];
@@ -93,11 +107,19 @@ class PostModel
             $sql .= ' LIMIT :limit';
         }
 
+        if(is_int($offset)) {
+            $sql .= ' OFFSET :offset';
+        }
+
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(':category_id', $categoryId, PDO::PARAM_INT);
 
         if (is_int($limit)) {
             $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        }
+
+        if(is_int($offset)) {
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         }
 
         $stmt->execute();
