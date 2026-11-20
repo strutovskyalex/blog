@@ -22,13 +22,13 @@ final class CategoryController
         $this->postModel = new PostModel($pdo);
     }
 
-    public function show(?int $id = null): void
+    public function show(?int $categoryId = null): void
     {
-        $categoryId = $id ?? (filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: null);
         if ($categoryId === null || $categoryId <= 0) {
             $this->renderNotFound('Invalid category identifier.');
             return;
         }
+
 
         $category = $this->categoryModel->findById($categoryId);
         if ($category === null) {
@@ -36,11 +36,19 @@ final class CategoryController
             return;
         }
 
-        $posts = $this->postModel->getAllByCategoryId($categoryId);
+        $sort = (string) ($_GET['sort'] ?? 'date');
+        $sort = in_array($sort, ['date', 'views'], true) ? $sort : 'date';
+
+        $dir = strtolower((string) ($_GET['dir'] ?? 'desc'));
+        $dir = in_array($dir, ['asc', 'desc'], true) ? $dir : 'desc';
+
+        $posts = $this->postModel->getPostsByCategorySorted($categoryId, $sort, $dir);
 
         $this->smarty->assign('pageTitle', $category['name'] . ' — Blog');
         $this->smarty->assign('category', $category);
         $this->smarty->assign('posts', $posts);
+        $this->smarty->assign('currentSort', $sort);
+        $this->smarty->assign('currentDir', $dir);
         $this->smarty->display('category.tpl');
     }
 

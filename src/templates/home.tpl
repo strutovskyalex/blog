@@ -20,7 +20,7 @@
                                 <article class="card post-card h-100">
                                     <div class="card-body d-flex flex-column p-4">
                                         <div class="post-card__meta mb-2">
-                                            <span>{$post.created_at|date_format:"%d.%m.%Y"}</span>
+                                            <span>{$post.created_at|date_format:"%d.%m.%Y %H:%M"}</span>
                                             {if isset($post.views)}
                                                 <span class="ms-2">• {$post.views} views</span>
                                             {/if}

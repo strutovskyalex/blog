@@ -29,7 +29,7 @@ final class HomeController
             $categoryId = (int) $category['id'];
             $sections[] = [
                 'category' => $category,
-                'posts'    => $this->postModel->getLatestByCategoryId($categoryId, 3),
+                'posts'    => $this->postModel->getPostsByCategorySorted($categoryId, 'date', 'desc', 3),
             ];
         }
 

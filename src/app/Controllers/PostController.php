@@ -20,26 +20,21 @@ final class PostController
         $this->categoryModel = new CategoryModel($pdo);
     }
 
-    public function show(?int $id = null): void
+    public function show(?int $postId = null): void
     {
-        $id = $id ?? (filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: null);
-
-        if (!$id || $id <= 0) {
-            http_response_code(400);
-            echo 'Invalid post ID';
+        if (!is_int($postId) || $postId <= 0) {
+            $this->renderNotFound('Invalid post ID');
             return;
         }
 
-        $post = $this->postModel->findAndIncrementViews($id);
+        $post = $this->postModel->findAndIncrementViews($postId);
         if ($post === null) {
-            http_response_code(404);
-            echo 'Post not found';
+            $this->renderNotFound('Post not found.');
             return;
         }
 
 
-        $categories = $this->categoryModel->findByIds($post['category_id_list']);
-        $currentPostId = (int) $post['id'];
+        $categories = $this->categoryModel->findByIds($post['category_ids']);
 
         $suggestedPosts = $this->postModel->getRandomSuggestedByCategories(
             categoryIds: $post['category_ids'],
@@ -52,5 +47,13 @@ final class PostController
         $this->smarty->assign('categories', $categories);
         $this->smarty->assign('suggestedPosts', $suggestedPosts);
         $this->smarty->display('post.tpl');
+    }
+
+    private function renderNotFound(string $message): void
+    {
+        http_response_code(404);
+        $this->smarty->assign('pageTitle', '404 — Post Not Found');
+        $this->smarty->assign('errorMessage', $message);
+        $this->smarty->display('404.tpl');
     }
 }

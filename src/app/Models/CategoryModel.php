@@ -6,14 +6,14 @@ namespace App\Models;
 
 use PDO;
 
-final class CategoryModel
+class CategoryModel
 {
     public function __construct(private readonly PDO $pdo) {}
 
     public function getCategoriesWithPosts(): array
     {
         $sql = <<<'SQL'
-            SELECT c.id, c.name, c.description, c.created_at
+            SELECT c.id, c.name
             FROM `categories` c
             WHERE EXISTS (
                 SELECT 1
@@ -37,18 +37,13 @@ final class CategoryModel
         return $row !== false ? $row : null;
     }
 
-    public function findByIds(array $ids): array
+    public function findByIds(string $categoryIds): array
     {
-        $cleanIds = array_values(array_unique(array_filter(array_map('intval', $ids))));
-        if ($cleanIds === []) {
-            return [];
-        }
-
-        $placeholders = implode(',', array_fill(0, count($cleanIds), '?'));
         $stmt = $this->pdo->prepare(
-            "SELECT id, name, description, created_at FROM `categories` WHERE id IN ($placeholders) ORDER BY id ASC"
+            "SELECT id, name FROM `categories` WHERE id IN ($categoryIds) ORDER BY id ASC"
         );
-        $stmt->execute($cleanIds);
+
+        $stmt->execute();
 
         return $stmt->fetchAll();
     }
